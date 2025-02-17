@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    
+    @StateObject private var sharedData = SharedData()
     @State private var isLoading = false
     @State private var animationCount = 0
     @State private var showTextField = false
@@ -120,7 +120,7 @@ struct ContentView: View {
                     if showAdditionalFields {
                         Label("Create File", systemImage: "pencil.circle")
                         VStack(spacing: 20) {
-                            TextField(".swift", text: .constant(""))
+                            TextField(".swift", text: $sharedData.fileNames[0])
                                 .frame(width: 200, height: 20)
                                 .padding()
                                 .background(Color.white.opacity(0.2))
@@ -135,7 +135,7 @@ struct ContentView: View {
                                 .textInputAutocapitalization(.never)
                                 .focused($focusedField, equals: .field1)
                             
-                            TextField(".xib", text: .constant(""))
+                            TextField(".xib", text: $sharedData.fileNames[1])
                                 .frame(width: 200, height: 20)
                                 .padding()
                                 .background(Color.white.opacity(0.2))
@@ -150,7 +150,7 @@ struct ContentView: View {
                                 .textInputAutocapitalization(.never)
                                 .focused($focusedField, equals: .field2)
                             
-                            TextField(".gitignore", text: .constant(""))
+                            TextField(".gitignore", text: $sharedData.fileNames[2])
                                 .frame(width: 200, height: 20)
                                 .padding()
                                 .background(Color.white.opacity(0.2))
@@ -165,7 +165,7 @@ struct ContentView: View {
                                 .textInputAutocapitalization(.never)
                                 .focused($focusedField, equals: .field3)
                             
-                            TextField(".swift", text: .constant(""))
+                            TextField(".swift", text: $sharedData.fileNames[3])
                                 .frame(width: 200, height: 20)
                                 .padding()
                                 .background(Color.white.opacity(0.2))
@@ -181,7 +181,7 @@ struct ContentView: View {
                                 .focused($focusedField, equals: .field4)
                         }
                         
-                        NavigationLink(destination: LandingPageView()) {
+                        NavigationLink(destination: LandingPageView(sharedData: sharedData)) {
                             Image(systemName: "arrow.right.circle")
                                 .font(.system(size: 30))
                                 .foregroundColor(.white)
@@ -199,12 +199,5 @@ struct ContentView: View {
             showTextField = true
             focusedField = .username
         }
-    }
-}
-
-// Preview provider
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }
