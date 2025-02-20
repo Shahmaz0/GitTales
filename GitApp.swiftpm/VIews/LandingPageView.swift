@@ -9,8 +9,7 @@ struct LandingPageView: View {
     @State private var showStoreImage: Bool = false
     @State private var isGrouped: Bool = false
     @State private var navigateToNewPage: Bool = false
-    @State private var showStatusImage: Bool = false
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -19,19 +18,19 @@ struct LandingPageView: View {
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
-                
-                // Store Image
+
+                // Store Image (existing code)
                 Image("store")
                     .resizable()
                     .frame(width: 400, height: 300)
                     .offset(x: showStoreImage ? 0 : UIScreen.main.bounds.width, y: 0)
                     .animation(.easeInOut(duration: 1.5), value: showStoreImage)
                     .position(x: UIScreen.main.bounds.width / 4, y: UIScreen.main.bounds.height / 1.9)
-                
-                // Snowfall Effect
+
+                // Snowfall Effect (existing code)
                 SnowfallView()
                 
-                // User Info Card (Top-Left)
+                // User Info Card (existing code)
                 VStack {
                     HStack {
                         UserInfoCardView(username: "Shahma")
@@ -42,18 +41,10 @@ struct LandingPageView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .padding(.top, 80)
                 .padding(.leading, 50)
-                
-                if showStatusImage {
-                    Image("Image") // Replace with your image name
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                }
-                
+
                 VStack {
                     Spacer()
-                    
+
                     // Show circles only if git init was typed
                     if showCircles {
                         HStack(spacing: 40) {
@@ -62,7 +53,7 @@ struct LandingPageView: View {
                                     Circle()
                                         .fill(Color(red: 67/255, green: 67/255, blue: 67/255))
                                         .frame(width: 120, height: 120)
-                                    
+
                                     VStack(spacing: 10) {
                                         Image("swiftLogo")
                                             .resizable()
@@ -89,17 +80,21 @@ struct LandingPageView: View {
                         }
                         .padding(.horizontal, UIScreen.main.bounds.width / 4)
                     }
-                    
-                    // Terminal-like text field
+
+                    // Terminal-like text field (existing code)
                     TerminalView(textInput: $textInput, commandHistory: $commandHistory) {
                         handleCommand()
                     }
-                    
+
                     Spacer().frame(height: 80)
                 }
             }
             .navigationDestination(isPresented: $navigateToNewPage) {
-                PhotoStudioView(textInput: $textInput, commandHistory: $commandHistory, onSubmit: handleCommand)
+                PhotoStudioView(
+                    textInput: $textInput,
+                    commandHistory: $commandHistory,
+                    onSubmit: handleCommand
+                )
             }
         }
     }
@@ -108,10 +103,12 @@ struct LandingPageView: View {
         if !textInput.isEmpty {
             commandHistory.append(textInput)
             
+            // Handle the "git init" command (existing functionality)
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git init" {
                 showCircles = true
             }
             
+            // Handle the "git checkout main" command (existing functionality)
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git checkout main" {
                 withAnimation {
                     isGrouped = true
@@ -128,28 +125,17 @@ struct LandingPageView: View {
                 }
             }
             
+            // Handle the "git branch main" command (existing functionality)
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git branch main" {
                 withAnimation {
                     showStoreImage = true
                 }
             }
             
-            if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git branch -D main" {
-                withAnimation {
-                    showStoreImage = false
-                }
-            }
-            
+            // Handle the "git status" command (new functionality)
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git status" {
-                withAnimation(.easeInOut(duration: 1.5)) {
-                    showStatusImage = true
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    withAnimation(.easeInOut(duration: 1.5)) {
-                        showStatusImage = false
-                    }
-                }
+                // Show the image overlay in PhotoStudioView
+                navigateToNewPage = true
             }
             
             textInput = ""

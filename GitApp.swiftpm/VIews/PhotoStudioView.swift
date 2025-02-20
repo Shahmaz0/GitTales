@@ -12,6 +12,8 @@ struct PhotoStudioView: View {
     @Binding var commandHistory: [String]
     var onSubmit: () -> Void
     
+    @State private var showStatusImage: Bool = false // State to control image visibility
+    
     var body: some View {
         ZStack {
             // Background Image
@@ -48,15 +50,50 @@ struct PhotoStudioView: View {
                 Spacer()
                 
                 // Terminal-like text field
-                TerminalView(textInput: $textInput, commandHistory: $commandHistory, onSubmit: onSubmit)
+                TerminalView(textInput: $textInput, commandHistory: $commandHistory, onSubmit: {
+                    handleCommand()
+                })
                 
                 Spacer().frame(height: 80)
             }
+            
+            // Overlay Image (appears on top of everything)
+            if showStatusImage {
+                Image("Image") // Replace with your image name
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .transition(.opacity) // Smooth fade-in animation
+                    .opacity(0.2)
+                    .animation(.easeInOut(duration: 0.5), value: showStatusImage)
+                    .onAppear {
+                        // Hide the image after 3 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                            withAnimation {
+                                showStatusImage = false
+                            }
+                        }
+                    }
+            }
+        }
+    }
+    
+    private func handleCommand() {
+        if !textInput.isEmpty {
+            commandHistory.append(textInput)
+            
+            if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git status" {
+                withAnimation {
+                    showStatusImage = true // Show the image
+                }
+            }
+            
+            textInput = "" // Clear the input field
         }
     }
 }
 
-// preview
+// Preview remains the same
 struct PhotoStudioView_Previews: PreviewProvider {
     static var previews: some View {
         PhotoStudioView(
