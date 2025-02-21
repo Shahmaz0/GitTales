@@ -12,7 +12,8 @@ struct PhotoStudioView: View {
     @Binding var commandHistory: [String]
     var onSubmit: () -> Void
     
-    @State private var showStatusImage: Bool = false // State to control image visibility
+    @State private var showStatusImage: Bool = false
+    @State private var isStaged: Bool = false // New state for git add animation
     
     var body: some View {
         ZStack {
@@ -42,8 +43,12 @@ struct PhotoStudioView: View {
                     }
                     .frame(width: 120, height: 50)
                 }
-                .offset(x: CGFloat(index) * 100 + 110, y: -CGFloat(index) * 40 - 105) // Adjust offsets to align with chairs
-                .rotationEffect(.degrees(35)) // Rotate to match chair inclination
+                .offset(
+                    x: isStaged ? -400 : (CGFloat(index) * 100 + 110),
+                    y: isStaged ? UIScreen.main.bounds.height / 2 - 500 : (-CGFloat(index) * 40 - 105)
+                )
+                .rotationEffect(.degrees(isStaged ? 0 : 35))
+                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStaged)
             }
             
             VStack {
@@ -57,17 +62,16 @@ struct PhotoStudioView: View {
                 Spacer().frame(height: 80)
             }
             
-            // Overlay Image (appears on top of everything)
+            // Overlay Image
             if showStatusImage {
-                Image("Image") // Replace with your image name
+                Image("Image")
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
-                    .transition(.opacity) // Smooth fade-in animation
-                    .opacity(0.2)
+                    .opacity(0.7)
+                    .transition(.opacity)
                     .animation(.easeInOut(duration: 0.5), value: showStatusImage)
                     .onAppear {
-                        // Hide the image after 3 seconds
                         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                             withAnimation {
                                 showStatusImage = false
@@ -82,16 +86,23 @@ struct PhotoStudioView: View {
         if !textInput.isEmpty {
             commandHistory.append(textInput)
             
-            if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git status" {
+            let command = textInput.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if command == "git status" {
                 withAnimation {
-                    showStatusImage = true // Show the image
+                    showStatusImage = true
+                }
+            } else if command == "git add ." {
+                withAnimation {
+                    isStaged = true
                 }
             }
             
-            textInput = "" // Clear the input field
+            textInput = ""
         }
     }
 }
+
 
 // Preview remains the same
 struct PhotoStudioView_Previews: PreviewProvider {
