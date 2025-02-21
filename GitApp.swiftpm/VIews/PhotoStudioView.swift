@@ -4,7 +4,6 @@
 //
 //  Created by Shahma Ansari on 19/02/25.
 //
-
 import SwiftUI
 
 struct PhotoStudioView: View {
@@ -14,6 +13,7 @@ struct PhotoStudioView: View {
     
     @State private var showStatusImage: Bool = false
     @State private var isStaged: Bool = false // New state for git add animation
+    @State private var isStagedAndAligned: Bool = false // New state to track if files are in staged area and aligned horizontally
     
     var body: some View {
         ZStack {
@@ -28,27 +28,29 @@ struct PhotoStudioView: View {
                 ZStack {
                     Circle()
                         .fill(Color(red: 67/255, green: 67/255, blue: 67/255))
-                        .frame(width: 100, height: 100)
+                        .frame(width: isStagedAndAligned ? 70 : 100, height: isStagedAndAligned ? 70 : 100) // Animate size change
+                        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isStagedAndAligned)
                     
-                    VStack(spacing: 10) {
+                    VStack(spacing: isStagedAndAligned ? 5 : 10) {
                         Image("swiftLogo")
                             .resizable()
-                            .frame(width: 70, height: 70)
+                            .frame(width: isStagedAndAligned ? 40 : 70, height: isStagedAndAligned ? 40 : 70) // Adjust image size
                             .foregroundColor(.white)
                             .padding(.top, 10)
                         Text("File \(index + 1)")
                             .foregroundColor(.white)
-                            .font(.system(size: 14))
-                            .padding(.bottom, 10)
+                            .font(.system(size: isStagedAndAligned ? 12 : 14)) // Adjust font size
+                            .padding(.bottom, (isStagedAndAligned ? 15 : 15))
                     }
-                    .frame(width: 120, height: 50)
+                    .frame(width: isStagedAndAligned ? 80 : 120, height: isStagedAndAligned ? 30 : 50) // Adjust container size
                 }
                 .offset(
-                    x: isStaged ? -400 : (CGFloat(index) * 100 + 110),
-                    y: isStaged ? UIScreen.main.bounds.height / 2 - 500 : (-CGFloat(index) * 40 - 105)
+                    x: isStaged ? (isStagedAndAligned ? CGFloat(index) * 80 - 525 : -400) : (CGFloat(index) * 100 + 110),
+                    y: isStaged ? (isStagedAndAligned ? UIScreen.main.bounds.height / 6 - 200 : UIScreen.main.bounds.height / 2 - 500) : (-CGFloat(index) * 40 - 105)
                 )
-                .rotationEffect(.degrees(isStaged ? 0 : 35))
+                .rotationEffect(.degrees(isStaged ? (isStagedAndAligned ? 0 : 0) : 35))
                 .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStaged)
+                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStagedAndAligned)
             }
             
             VStack {
@@ -68,7 +70,7 @@ struct PhotoStudioView: View {
                     .resizable()
                     .scaledToFill()
                     .ignoresSafeArea()
-                    .opacity(0.7)
+                    .opacity(0.5)
                     .transition(.opacity)
                     .animation(.easeInOut(duration: 0.5), value: showStatusImage)
                     .onAppear {
@@ -92,9 +94,21 @@ struct PhotoStudioView: View {
                 withAnimation {
                     showStatusImage = true
                 }
-            } else if command == "git add ." {
+            } else if command == "git add ." || command == "git stash pop" {
                 withAnimation {
                     isStaged = true
+                }
+                
+                // After the initial animation, align the circles horizontally and resize them
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    withAnimation {
+                        isStagedAndAligned = true
+                    }
+                }
+            } else if (command == "git stash") {
+                withAnimation {
+                    isStaged = false
+                    isStagedAndAligned = false
                 }
             }
             
@@ -102,7 +116,6 @@ struct PhotoStudioView: View {
         }
     }
 }
-
 
 // Preview remains the same
 struct PhotoStudioView_Previews: PreviewProvider {
@@ -114,3 +127,4 @@ struct PhotoStudioView_Previews: PreviewProvider {
         )
     }
 }
+
