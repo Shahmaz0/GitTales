@@ -17,7 +17,7 @@ struct TerminalView: View {
     private let predefinedCommands: [CommandItem] = [
         CommandItem(
             command: "git init",
-            output: "Initialized empty Git repository in ~/demo_Project/.git/"
+            output: "Initialized empty Git repository in ~/demo_Project/"
         ),
         CommandItem(
             command: "git branch photoStudio",
@@ -34,7 +34,7 @@ struct TerminalView: View {
                 No commits yet
                 nothing to commit (create/copy files and use "git add" to track)
                 Changes not staged for commit:
-                    added: files
+                    added: 4 files
                 """
         ),
         CommandItem(
@@ -51,7 +51,20 @@ struct TerminalView: View {
                 create mode 100644 file3.gitignore
                 create mode 100644 file4.swift
                 """
-        )
+        ),
+        CommandItem(command: "git push", output: """
+                    Enumerating objects: 4, done.
+                    Counting objects: 100% (4/4), done.
+                    Delta compression using up to 8 threads
+                    Compressing objects: 100% (3/3), done.
+                    Writing objects: 100% (3/3), 350 bytes | 350.00 KiB/s, done.
+                    Total 3 (delta 2), reused 0 (delta 0)
+                    remote: Resolving deltas: 100% (2/2), 
+                    completed with 2 local objects.
+                    To https://github.com/username/repository.git
+                       abc1234..def5678  photoStudio -> main
+                    """
+                   )
     ]
     
     private var currentCommand: CommandItem? {
@@ -64,13 +77,12 @@ struct TerminalView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 2) {
-                        // Display command history with outputs
+                        
                         ForEach(sharedData.commandEntries.indices, id: \.self) { index in
                             CommandEntryView(entry: sharedData.commandEntries[index])
                                 .id(index)
                         }
-                        
-                        // Current command with arrow
+                    
                         if let command = currentCommand {
                             CurrentCommandView(
                                 command: command.command,
@@ -107,14 +119,11 @@ struct TerminalView: View {
     private func executeCommand() {
         guard let command = currentCommand else { return }
         
-        // Add command and output to history
         sharedData.commandEntries.append((command: command.command, output: command.output))
         
-        // Set the text input and execute the command
         textInput = command.command
         onSubmit()
         
-        // Advance to next command after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             withAnimation {
                 sharedData.currentCommandIndex += 1

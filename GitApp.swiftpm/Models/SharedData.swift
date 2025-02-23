@@ -8,9 +8,11 @@
 import Foundation
 
 class SharedData: ObservableObject {
-    @Published var fileNames: [String]
     @Published var currentCommandIndex: Int
     @Published var commandEntries: [(command: String, output: String)]
+    @Published var fileNames: [String] = Array(repeating: "", count: 4)
+    @Published var username: String = ""
+    @Published var projectName: String = ""
     
     init() {
         // Initialize with 4 empty strings for the file names

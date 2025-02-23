@@ -1,3 +1,10 @@
+//
+//  SwiftUIView.swift
+//  GitApp
+//
+//  Created by Shahma Ansari on 23/02/25.
+//
+
 import SwiftUI
 
 struct CustomTextField: View {
@@ -28,8 +35,6 @@ struct CustomTextField: View {
 struct UserInfoView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var sharedData = SharedData()
-    @State private var username = ""
-    @State private var projectName = ""
     @State private var isProjectNameFieldActive = false
     @State private var showAdditionalFields = false
     @FocusState private var focusedField: Field?
@@ -57,7 +62,7 @@ struct UserInfoView: View {
         VStack(spacing: 30) {
             CustomTextField(
                 placeholder: "Your Name",
-                text: $username,
+                text: $sharedData.username, // Bind to sharedData.username
                 width: 150,
                 focusField: .username,
                 focusedField: $focusedField
@@ -74,7 +79,7 @@ struct UserInfoView: View {
         VStack(spacing: 30) {
             CustomTextField(
                 placeholder: "Project Name",
-                text: $projectName,
+                text: $sharedData.projectName, // Bind to sharedData.projectName
                 width: 150,
                 focusField: .projectName,
                 focusedField: $focusedField
@@ -150,6 +155,7 @@ struct UserInfoView: View {
         .navigationBarHidden(false)
     }
 }
+
 
 #Preview {
     UserInfoView()

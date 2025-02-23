@@ -1,3 +1,9 @@
+//
+//  PhotoStudioView.swift
+//  GitApp
+//
+//  Created by Shahma Ansari on 19/02/25.
+//
 import SwiftUI
 
 struct PhotoStudioView: View {
@@ -7,12 +13,17 @@ struct PhotoStudioView: View {
     var onSubmit: () -> Void
     
     @State private var showStatusImage: Bool = false
-    @State private var isStaged: Bool = true
-    @State private var isStagedAndAligned: Bool = true
+    @State private var isStaged: Bool = false
+    @State private var isStagedAndAligned: Bool = false
     @State private var showInitialImage: Bool = true
     @State private var showFlash: Bool = false
-    @State private var showImageFromLeft: Bool = true // New state for the image coming from the left
-    @State private var imageOffset: CGFloat = -UIScreen.main.bounds.width // New state for the image's horizontal offset
+    @State private var showImageFromLeft: Bool = false
+    @State private var imageOffset: CGFloat = -UIScreen.main.bounds.width
+    @State private var removeCircles: Bool = false
+    @State private var showGitAddImage: Bool = false
+    @State private var showGitCommitImage: Bool = false
+    @State private var showPushImage: Bool = false
+    @State private var showThankYouPopup: Bool = false
 
     var body: some View {
         ZStack {
@@ -22,7 +33,6 @@ struct PhotoStudioView: View {
                 .scaledToFill()
                 .ignoresSafeArea()
             
-            // Flash Effect
             if showFlash {
                 Rectangle()
                     .fill(Color.white)
@@ -33,40 +43,40 @@ struct PhotoStudioView: View {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             withAnimation {
                                 showFlash = false
-                                showImageFromLeft = true // Trigger the image to come from the left
+                                removeCircles = true // Trigger circle removal
+                                showImageFromLeft = true
                             }
                         }
                     }
             }
             
-            // Image coming from the left
             if showImageFromLeft {
-                Image("gallery") // Replace with your actual image name
+                Image("gallery")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 120, height: 400) // Adjust size as needed
+                    .frame(width: 200, height: 400)
                     .offset(x: imageOffset, y: 0)
                     .onAppear {
                         withAnimation(.easeOut(duration: 1)) {
-                            imageOffset = 20 // Move the image to 20 points from the left
+                            imageOffset = 20
                         }
                     }
-                    .position(x: 60, y: UIScreen.main.bounds.height - 150) // Position the image 20 points from the bottom
+                    .position(x: 60, y: UIScreen.main.bounds.height - 150)
             }
             
-            // Circles placed on chairs
-            ForEach(0..<4, id: \.self) { index in
-                CircleView(
-                    index: index,
-                    isStaged: isStaged,
-                    isStagedAndAligned: isStagedAndAligned
-                )
+            if !removeCircles {
+                ForEach(0..<4, id: \.self) { index in
+                    CircleView(
+                        index: index,
+                        isStaged: isStaged,
+                        isStagedAndAligned: isStagedAndAligned,
+                        removeCircles: $removeCircles
+                    )
+                }
             }
             
             VStack {
                 Spacer()
-                
-                // Terminal-like text field
                 TerminalView(
                     textInput: $textInput,
                     commandHistory: $commandHistory,
@@ -77,16 +87,15 @@ struct PhotoStudioView: View {
                 Spacer().frame(height: 80)
             }
             
-            // Initial Image (Shown for 5 seconds when the view appears)
             if showInitialImage {
                 VStack {
                     Spacer().frame(height: 20)
                     HStack {
                         Spacer()
-                        Image("JHGitCheckout") // Replace with your actual image name
+                        Image("JHGitCheckout")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 450, height: 200) // Adjust size as needed
+                            .frame(width: 500, height: 250)
                             .transition(.opacity)
                             .animation(.easeInOut(duration: 0.5), value: showInitialImage)
                             .onAppear {
@@ -100,11 +109,10 @@ struct PhotoStudioView: View {
                     }
                     Spacer()
                 }
-                .transition(.opacity) // Smooth transition
+                .transition(.opacity)
                 .zIndex(1)
             }
             
-            // Overlay Image
             if showStatusImage {
                 Image("Image")
                     .resizable()
@@ -120,6 +128,90 @@ struct PhotoStudioView: View {
                             }
                         }
                     }
+            }
+            
+            if showGitAddImage {
+                VStack {
+                    Image("gitAdd")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 500, height: 250)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.5), value: showGitAddImage)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                withAnimation {
+                                    showGitAddImage = false
+                                }
+                            }
+                        }
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 20)
+            }
+            
+            // Image for git commit
+            if showGitCommitImage {
+                VStack {
+                    Image("gitCommit")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 500, height: 250)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.5), value: showGitCommitImage)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                                withAnimation {
+                                    showGitCommitImage = false
+                                }
+                            }
+                        }
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 20)
+            }
+          
+            if showPushImage {
+                VStack {
+                    Image("gitPush")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 500, height: 250)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.5), value: showPushImage)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                                withAnimation {
+                                    showPushImage = false
+                                    showThankYouPopup = true
+                                }
+                            }
+                        }
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.top, 20)
+            }
+          
+            if showThankYouPopup {
+                Color.black.opacity(0.5) // Semi-transparent background
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.5), value: showThankYouPopup)
+                
+                VStack {
+                    Image("thankYou") // Replace with your image name
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 150) // Adjust size as needed
+                        .transition(.scale)
+                        .animation(.easeInOut(duration: 0.5), value: showThankYouPopup)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                .transition(.scale)
+                .animation(.easeInOut(duration: 0.5), value: showThankYouPopup)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -139,11 +231,16 @@ struct PhotoStudioView: View {
                 withAnimation {
                     isStaged = true
                 }
-                
-                // After the initial animation, align the circles horizontally and resize them
+              
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     withAnimation {
                         isStagedAndAligned = true
+                    }
+                   
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        withAnimation {
+                            showGitAddImage = true
+                        }
                     }
                 }
             } else if command == "git stash" {
@@ -152,9 +249,33 @@ struct PhotoStudioView: View {
                     isStagedAndAligned = false
                 }
             } else if command == "git commit -m 'photos clicked'" {
-                // Trigger the flash effect
                 withAnimation {
                     showFlash = true
+                }
+               
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { withAnimation {
+                        showGitCommitImage = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                        withAnimation {
+                            showGitCommitImage = false
+                        }
+                    }
+                }
+            } else if command == "git push" {
+                withAnimation {
+                    showImageFromLeft = false
+                }
+                
+                withAnimation {
+                    showPushImage = true
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    withAnimation {
+                        showPushImage = false
+                        showThankYouPopup = true
+                    }
                 }
             }
             

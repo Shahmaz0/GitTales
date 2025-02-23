@@ -1,3 +1,10 @@
+//
+//  SwiftUIView.swift
+//  GitApp
+//
+//  Created by Shahma Ansari on 20/02/25.
+//
+
 import SwiftUI
 
 struct LandingPageView: View {
