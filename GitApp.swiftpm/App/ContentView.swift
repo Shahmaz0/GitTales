@@ -38,26 +38,6 @@ struct ContentView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 100, height: 100)
                         .foregroundColor(.white)
-
-                    // Loader animation
-                    if !showTextField {
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .frame(width: 100, height: 2)
-                                .foregroundColor(.white.opacity(0.3))
-                            
-                            Rectangle()
-                                .frame(width: 50, height: 2)
-                                .foregroundColor(.white)
-                                .offset(x: isLoading ? 100 : -50)
-                                .animation(.linear(duration: 1).repeatCount(3, autoreverses: false), value: isLoading)
-                        }
-                        .frame(width: 100, height: 2)
-                        .clipped()
-                        .onAppear {
-                            startLoadingAnimation()
-                        }
-                    }
                     
                     // Username TextField with arrow button
                     if showTextField && !isProjectNameFieldActive {

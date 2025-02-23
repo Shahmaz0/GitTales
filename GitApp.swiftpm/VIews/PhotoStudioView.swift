@@ -6,14 +6,50 @@
 //
 import SwiftUI
 
+struct CircleView: View {
+    var index: Int
+    var isStaged: Bool
+    var isStagedAndAligned: Bool
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color(red: 67/255, green: 67/255, blue: 67/255))
+                .frame(width: isStagedAndAligned ? 70 : 100, height: isStagedAndAligned ? 70 : 100)
+                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isStagedAndAligned)
+            
+            VStack(spacing: isStagedAndAligned ? 5 : 10) {
+                Image("swiftLogo")
+                    .resizable()
+                    .frame(width: isStagedAndAligned ? 40 : 70, height: isStagedAndAligned ? 40 : 70)
+                    .foregroundColor(.white)
+                    .padding(.top, 10)
+                Text("File \(index + 1)")
+                    .foregroundColor(.white)
+                    .font(.system(size: isStagedAndAligned ? 12 : 14))
+                    .padding(.bottom, (isStagedAndAligned ? 15 : 15))
+            }
+            .frame(width: isStagedAndAligned ? 80 : 120, height: isStagedAndAligned ? 30 : 50)
+        }
+        .offset(
+            x: isStaged ? (isStagedAndAligned ? CGFloat(index) * 80 - 525 : -400) : (CGFloat(index) * 100 + 110),
+            y: isStaged ? (isStagedAndAligned ? UIScreen.main.bounds.height / 6 - 200 : UIScreen.main.bounds.height / 2 - 500) : (-CGFloat(index) * 40 - 105)
+        )
+        .rotationEffect(.degrees(isStaged ? (isStagedAndAligned ? 0 : 0) : 35))
+        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStaged)
+        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStagedAndAligned)
+    }
+}
+
 struct PhotoStudioView: View {
+    @ObservedObject var sharedData: SharedData
     @Binding var textInput: String
     @Binding var commandHistory: [String]
     var onSubmit: () -> Void
     
     @State private var showStatusImage: Bool = false
-    @State private var isStaged: Bool = false // New state for git add animation
-    @State private var isStagedAndAligned: Bool = false // New state to track if files are in staged area and aligned horizontally
+    @State private var isStaged: Bool = false
+    @State private var isStagedAndAligned: Bool = false
     
     var body: some View {
         ZStack {
@@ -25,41 +61,22 @@ struct PhotoStudioView: View {
             
             // Circles placed on chairs
             ForEach(0..<4, id: \.self) { index in
-                ZStack {
-                    Circle()
-                        .fill(Color(red: 67/255, green: 67/255, blue: 67/255))
-                        .frame(width: isStagedAndAligned ? 70 : 100, height: isStagedAndAligned ? 70 : 100) // Animate size change
-                        .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isStagedAndAligned)
-                    
-                    VStack(spacing: isStagedAndAligned ? 5 : 10) {
-                        Image("swiftLogo")
-                            .resizable()
-                            .frame(width: isStagedAndAligned ? 40 : 70, height: isStagedAndAligned ? 40 : 70) // Adjust image size
-                            .foregroundColor(.white)
-                            .padding(.top, 10)
-                        Text("File \(index + 1)")
-                            .foregroundColor(.white)
-                            .font(.system(size: isStagedAndAligned ? 12 : 14)) // Adjust font size
-                            .padding(.bottom, (isStagedAndAligned ? 15 : 15))
-                    }
-                    .frame(width: isStagedAndAligned ? 80 : 120, height: isStagedAndAligned ? 30 : 50) // Adjust container size
-                }
-                .offset(
-                    x: isStaged ? (isStagedAndAligned ? CGFloat(index) * 80 - 525 : -400) : (CGFloat(index) * 100 + 110),
-                    y: isStaged ? (isStagedAndAligned ? UIScreen.main.bounds.height / 6 - 200 : UIScreen.main.bounds.height / 2 - 500) : (-CGFloat(index) * 40 - 105)
+                CircleView(
+                    index: index,
+                    isStaged: isStaged,
+                    isStagedAndAligned: isStagedAndAligned
                 )
-                .rotationEffect(.degrees(isStaged ? (isStagedAndAligned ? 0 : 0) : 35))
-                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStaged)
-                .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStagedAndAligned)
             }
             
             VStack {
                 Spacer()
                 
                 // Terminal-like text field
-                TerminalView(textInput: $textInput, commandHistory: $commandHistory, onSubmit: {
-                    handleCommand()
-                })
+                TerminalView(
+                    textInput: $textInput,
+                    commandHistory: $commandHistory,
+                    sharedData: sharedData, onSubmit: handleCommand
+                )
                 
                 Spacer().frame(height: 80)
             }
@@ -117,10 +134,11 @@ struct PhotoStudioView: View {
     }
 }
 
-// Preview remains the same
+
 struct PhotoStudioView_Previews: PreviewProvider {
     static var previews: some View {
         PhotoStudioView(
+            sharedData: SharedData(), // Provide a SharedData instance
             textInput: .constant(""),
             commandHistory: .constant(["git init", "git branch main"]),
             onSubmit: {}
