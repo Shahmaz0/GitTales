@@ -1,45 +1,4 @@
-//
-//  SwiftUIView.swift
-//  GitApp
-//
-//  Created by Shahma Ansari on 19/02/25.
-//
 import SwiftUI
-
-struct CircleView: View {
-    var index: Int
-    var isStaged: Bool
-    var isStagedAndAligned: Bool
-    
-    var body: some View {
-        ZStack {
-            Circle()
-                .fill(Color(red: 67/255, green: 67/255, blue: 67/255))
-                .frame(width: isStagedAndAligned ? 70 : 100, height: isStagedAndAligned ? 70 : 100)
-                .animation(.spring(response: 0.5, dampingFraction: 0.6), value: isStagedAndAligned)
-            
-            VStack(spacing: isStagedAndAligned ? 5 : 10) {
-                Image("swiftLogo")
-                    .resizable()
-                    .frame(width: isStagedAndAligned ? 40 : 70, height: isStagedAndAligned ? 40 : 70)
-                    .foregroundColor(.white)
-                    .padding(.top, 10)
-                Text("File \(index + 1)")
-                    .foregroundColor(.white)
-                    .font(.system(size: isStagedAndAligned ? 12 : 14))
-                    .padding(.bottom, (isStagedAndAligned ? 15 : 15))
-            }
-            .frame(width: isStagedAndAligned ? 80 : 120, height: isStagedAndAligned ? 30 : 50)
-        }
-        .offset(
-            x: isStaged ? (isStagedAndAligned ? CGFloat(index) * 80 - 525 : -400) : (CGFloat(index) * 100 + 110),
-            y: isStaged ? (isStagedAndAligned ? UIScreen.main.bounds.height / 6 - 200 : UIScreen.main.bounds.height / 2 - 500) : (-CGFloat(index) * 40 - 105)
-        )
-        .rotationEffect(.degrees(isStaged ? (isStagedAndAligned ? 0 : 0) : 35))
-        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStaged)
-        .animation(.spring(response: 0.8, dampingFraction: 0.7).delay(Double(index) * 0.1), value: isStagedAndAligned)
-    }
-}
 
 struct PhotoStudioView: View {
     @ObservedObject var sharedData: SharedData
@@ -48,9 +7,13 @@ struct PhotoStudioView: View {
     var onSubmit: () -> Void
     
     @State private var showStatusImage: Bool = false
-    @State private var isStaged: Bool = false
-    @State private var isStagedAndAligned: Bool = false
-    
+    @State private var isStaged: Bool = true
+    @State private var isStagedAndAligned: Bool = true
+    @State private var showInitialImage: Bool = true
+    @State private var showFlash: Bool = false
+    @State private var showImageFromLeft: Bool = true // New state for the image coming from the left
+    @State private var imageOffset: CGFloat = -UIScreen.main.bounds.width // New state for the image's horizontal offset
+
     var body: some View {
         ZStack {
             // Background Image
@@ -58,6 +21,38 @@ struct PhotoStudioView: View {
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
+            
+            // Flash Effect
+            if showFlash {
+                Rectangle()
+                    .fill(Color.white)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: showFlash)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            withAnimation {
+                                showFlash = false
+                                showImageFromLeft = true // Trigger the image to come from the left
+                            }
+                        }
+                    }
+            }
+            
+            // Image coming from the left
+            if showImageFromLeft {
+                Image("gallery") // Replace with your actual image name
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 120, height: 400) // Adjust size as needed
+                    .offset(x: imageOffset, y: 0)
+                    .onAppear {
+                        withAnimation(.easeOut(duration: 1)) {
+                            imageOffset = 20 // Move the image to 20 points from the left
+                        }
+                    }
+                    .position(x: 60, y: UIScreen.main.bounds.height - 150) // Position the image 20 points from the bottom
+            }
             
             // Circles placed on chairs
             ForEach(0..<4, id: \.self) { index in
@@ -75,10 +70,38 @@ struct PhotoStudioView: View {
                 TerminalView(
                     textInput: $textInput,
                     commandHistory: $commandHistory,
-                    sharedData: sharedData, onSubmit: handleCommand
+                    sharedData: sharedData,
+                    onSubmit: handleCommand
                 )
                 
                 Spacer().frame(height: 80)
+            }
+            
+            // Initial Image (Shown for 5 seconds when the view appears)
+            if showInitialImage {
+                VStack {
+                    Spacer().frame(height: 20)
+                    HStack {
+                        Spacer()
+                        Image("JHGitCheckout") // Replace with your actual image name
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 450, height: 200) // Adjust size as needed
+                            .transition(.opacity)
+                            .animation(.easeInOut(duration: 0.5), value: showInitialImage)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                                    withAnimation {
+                                        showInitialImage = false
+                                    }
+                                }
+                            }
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .transition(.opacity) // Smooth transition
+                .zIndex(1)
             }
             
             // Overlay Image
@@ -99,6 +122,7 @@ struct PhotoStudioView: View {
                     }
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     private func handleCommand() {
@@ -122,10 +146,15 @@ struct PhotoStudioView: View {
                         isStagedAndAligned = true
                     }
                 }
-            } else if (command == "git stash") {
+            } else if command == "git stash" {
                 withAnimation {
                     isStaged = false
                     isStagedAndAligned = false
+                }
+            } else if command == "git commit -m 'photos clicked'" {
+                // Trigger the flash effect
+                withAnimation {
+                    showFlash = true
                 }
             }
             
@@ -134,15 +163,13 @@ struct PhotoStudioView: View {
     }
 }
 
-
 struct PhotoStudioView_Previews: PreviewProvider {
     static var previews: some View {
         PhotoStudioView(
-            sharedData: SharedData(), // Provide a SharedData instance
+            sharedData: SharedData(),
             textInput: .constant(""),
             commandHistory: .constant(["git init", "git branch main"]),
             onSubmit: {}
         )
     }
 }
-
