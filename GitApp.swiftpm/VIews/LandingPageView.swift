@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct LandingPageView: View {
-    @ObservedObject var sharedData: SharedData
+    @ObservedObject var sharedData: SharedData // Use the passed SharedData instance
     @State private var textInput: String = ""
     @State private var commandHistory: [String] = []
-    @State private var showCircles: Bool = false // Initially hidden
+    @State private var showCircles: Bool = false
     @State private var showHouseImage: Bool = false
     @State private var showStoreImage: Bool = false
     @State private var isGrouped: Bool = false
     @State private var navigateToNewPage: Bool = false
-    @State private var showBackground: Bool = false // Controls background visibility
-    @State private var showTextArea: Bool = true // Controls text area visibility
+    @State private var showBackground: Bool = false
+    @State private var showTextArea: Bool = true
     @State private var showJHGitInitImage: Bool = false
     @State private var showGitBranchMainImage: Bool = false
     @State private var showCenterImage: Bool = false
@@ -31,37 +31,37 @@ struct LandingPageView: View {
                         .resizable()
                         .scaledToFill()
                         .ignoresSafeArea()
-                        .transition(.opacity) // Smooth transition
+                        .transition(.opacity)
                 }
 
                 // Snowfall Effect (conditional visibility)
                 if showBackground {
                     SnowfallView()
-                        .transition(.opacity) // Smooth transition
+                        .transition(.opacity)
                 }
-                
+
                 // JHGitInit Image (conditional visibility)
                 if showJHGitInitImage {
                     VStack {
-                        Spacer().frame(height: 20) // Positions the image 20 points from the top
+                        Spacer().frame(height: 20)
                         HStack {
-                            Spacer() // Centers the image horizontally
+                            Spacer()
                             Image("JHInit")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 450, height: 200)
-                            Spacer() // Centers the image horizontally
+                            Spacer()
                         }
-                        Spacer() // Pushes the HStack to the top
+                        Spacer()
                     }
-                    .transition(.opacity) // Smooth transition
-                    .zIndex(1) // Ensure it appears on top
+                    .transition(.opacity)
+                    .zIndex(1)
                 }
 
                 // gitBranchMain Image (conditional visibility)
                 if showGitBranchMainImage {
                     VStack {
-                        Spacer().frame(height: 20) // Positions the image 20 points from the top
+                        Spacer().frame(height: 20)
                         HStack {
                             Spacer()
                             Image("gitBranchMain")
@@ -78,10 +78,10 @@ struct LandingPageView: View {
 
                 if showCenterImage {
                     VStack {
-                        Spacer().frame(height: 20) // Positions the image 20 points from the top
+                        Spacer().frame(height: 20)
                         HStack {
                             Spacer()
-                            Image("gitCheckout") // Replace "centerImage" with your image asset name
+                            Image("gitCheckout")
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 500, height: 400)
@@ -89,12 +89,11 @@ struct LandingPageView: View {
                         }
                         Spacer()
                     }
-                    .transition(.opacity) // Smooth transition
-                    .zIndex(3) // Ensure it appears on top
+                    .transition(.opacity)
+                    .zIndex(3)
                 }
-                
 
-                // Store Image (existing code)
+                // Store Image
                 Image("store")
                     .resizable()
                     .frame(width: 400, height: 300)
@@ -102,13 +101,12 @@ struct LandingPageView: View {
                     .animation(.easeInOut(duration: 1.5), value: showStoreImage)
                     .position(x: UIScreen.main.bounds.width / 4, y: UIScreen.main.bounds.height / 1.9)
 
-                // User Info Card (existing code)
+                // User Info Card
                 VStack {
                     HStack {
-                        UserInfoCardView(username: "Shahma")
+                        UserInfoCardView(username: sharedData.username) // Use sharedData.username
                         Spacer()
                     }
-                    
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -163,7 +161,7 @@ struct LandingPageView: View {
                         .padding(.horizontal, UIScreen.main.bounds.width / 4)
                     }
 
-                    // Terminal-like text field (existing code)
+                    // Terminal-like text field
                     TerminalView(
                         textInput: $textInput,
                         commandHistory: $commandHistory,
@@ -178,37 +176,34 @@ struct LandingPageView: View {
                     sharedData: sharedData,
                     textInput: $textInput,
                     commandHistory: $commandHistory,
-                    onSubmit: handleCommand // Pass sharedData here
+                    onSubmit: handleCommand
                 )
             }
         }
         .navigationBarBackButtonHidden(true)
     }
-    
+
     private func handleCommand() {
         if !textInput.isEmpty {
             commandHistory.append(textInput)
-            
+
             // Handle the "git init" command
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git init" {
                 withAnimation {
-                    showTextArea = false // Hide the text area
+                    showTextArea = false
                 }
-                
-                // Show background and snowfall after 1 second
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     withAnimation {
                         showBackground = true
                         showCircles = true
                     }
-                    
-                    // Show JHGitInit image after 1 second
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                         withAnimation {
                             showJHGitInitImage = true
                         }
-                        
-                        // Hide JHGitInit image after 5 seconds
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                             withAnimation {
                                 showJHGitInitImage = false
@@ -217,25 +212,22 @@ struct LandingPageView: View {
                     }
                 }
             }
-            
+
             // Handle the "git branch photoStudio" command
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git branch photoStudio" {
                 withAnimation {
                     showStoreImage = true
                 }
-                
-                // After the store image animation is complete, show the gitBranchMain image
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     withAnimation {
                         showGitBranchMainImage = true
                     }
-                    
-                    // Hide the gitBranchMain image after 5 seconds
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                         withAnimation {
                             showGitBranchMainImage = false
-                            
-                            // Show the center image after 2 seconds
+
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 withAnimation {
                                     showCenterImage = true
@@ -245,47 +237,44 @@ struct LandingPageView: View {
                     }
                 }
             }
-            
+
             // Handle the "git checkout photoStudio" command
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git checkout photoStudio" {
-                // Hide the center image first
                 withAnimation {
                     showCenterImage = false
                 }
-                
-                // After the center image animation completes, start the git checkout animation
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     withAnimation {
                         isGrouped = true
                     }
-                    
+
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                         withAnimation {
                             showHouseImage = true
                         }
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                             navigateToNewPage = true
                         }
                     }
-                    
-                    // Show the store image
+
                     withAnimation {
                         showStoreImage = true
                     }
                 }
             }
-            
+
             // Handle the "git status" command
             if textInput.trimmingCharacters(in: .whitespacesAndNewlines) == "git status" {
-                // Show the image overlay in PhotoStudioView
                 navigateToNewPage = true
             }
-            
+
             textInput = ""
         }
     }
 }
+
 
 struct LandingPageView_Previews: PreviewProvider {
     static var previews: some View {

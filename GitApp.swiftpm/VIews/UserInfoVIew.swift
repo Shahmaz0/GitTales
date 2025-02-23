@@ -34,11 +34,11 @@ struct CustomTextField: View {
 
 struct UserInfoView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var sharedData = SharedData()
+    @StateObject private var sharedData = SharedData() // Create SharedData here
     @State private var isProjectNameFieldActive = false
     @State private var showAdditionalFields = false
     @FocusState private var focusedField: Field?
-    
+
     enum Field: Hashable {
         case username
         case projectName
@@ -47,9 +47,9 @@ struct UserInfoView: View {
         case field3
         case field4
     }
-    
+
     private let fileExtensions = [".swift", ".xib", ".gitignore", ".swift"]
-    
+
     private var mainLogo: some View {
         Image("logo")
             .resizable()
@@ -57,7 +57,7 @@ struct UserInfoView: View {
             .frame(width: 70, height: 70)
             .foregroundColor(.white)
     }
-    
+
     private var usernameField: some View {
         VStack(spacing: 30) {
             CustomTextField(
@@ -67,14 +67,14 @@ struct UserInfoView: View {
                 focusField: .username,
                 focusedField: $focusedField
             )
-            
+
             navigationArrowButton {
                 isProjectNameFieldActive = true
                 focusedField = .projectName
             }
         }
     }
-    
+
     private var projectNameField: some View {
         VStack(spacing: 30) {
             CustomTextField(
@@ -84,18 +84,18 @@ struct UserInfoView: View {
                 focusField: .projectName,
                 focusedField: $focusedField
             )
-            
+
             navigationArrowButton {
                 showAdditionalFields = true
             }
         }
     }
-    
+
     private var additionalFields: some View {
         VStack(spacing: 20) {
             Label("Create files named after your friends.", systemImage: "pencil.circle")
                 .foregroundColor(.white)
-            
+
             ForEach(0..<4) { index in
                 CustomTextField(
                     placeholder: fileExtensions[index],
@@ -105,15 +105,15 @@ struct UserInfoView: View {
                     focusedField: $focusedField
                 )
             }
-            
-            NavigationLink(destination: LandingPageView(sharedData: sharedData)) {
+
+            NavigationLink(destination: LandingPageView(sharedData: sharedData)) { // Pass sharedData here
                 Image(systemName: "arrow.right.circle")
                     .font(.system(size: 30))
                     .foregroundColor(.white)
             }
         }
     }
-    
+
     private func navigationArrowButton(action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: "arrow.right.circle")
@@ -121,41 +121,40 @@ struct UserInfoView: View {
                 .foregroundColor(.white)
         }
     }
-    
+
     var body: some View {
         ZStack {
             Image("backgrounddim")
                 .resizable()
                 .scaledToFill()
                 .ignoresSafeArea()
-            
+
             VStack {
                 Spacer()
-                
+
                 VStack(spacing: 30) {
                     mainLogo
-                    
+
                     if !isProjectNameFieldActive {
                         usernameField
                     }
-                    
+
                     if isProjectNameFieldActive && !showAdditionalFields {
                         projectNameField
                     }
-                    
+
                     if showAdditionalFields {
                         additionalFields
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                
+
                 Spacer()
             }
         }
         .navigationBarHidden(false)
     }
 }
-
 
 #Preview {
     UserInfoView()

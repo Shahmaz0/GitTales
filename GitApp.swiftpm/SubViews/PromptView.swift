@@ -9,9 +9,10 @@ import SwiftUI
 
 // Terminal Prompt View with Colored Text
 struct PromptView: View {
+    
     var body: some View {
         HStack(spacing: 0) {
-            Text("~ demo_Project ")
+            Text("~ demo_project ")
                 .foregroundColor(Color(red: 105/255, green: 194/255, blue: 206/255)) // Green
             
             Text("git : (")
@@ -30,3 +31,5 @@ struct PromptView: View {
 #Preview {
     PromptView()
 }
+
+
